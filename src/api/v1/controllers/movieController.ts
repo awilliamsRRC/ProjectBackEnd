@@ -7,8 +7,8 @@
  */
 
 import { Request, Response, NextFunction } from "express";
-import * as itemService from "../services/itemService";
-import type { Item } from "../services/itemService";
+import * as movieService from "../services/movieService";
+import type { Movie } from "../services/movieService";
 
 /**
  * @description Get all movies.
@@ -21,7 +21,7 @@ export const getAllMovies = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const movies: Movie[] = await MovieService.getAllMovies();
+        const movies: Movie[] = await movieService.getAllMovies();
 
         res.status(200).json({ message: "Movies Retrieved", data: movies });
     } catch (error) {

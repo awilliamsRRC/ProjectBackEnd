@@ -17,7 +17,7 @@ const router: Router = express.Router();
  * @route GET /
  * @description Get all items.
  */
-router.get("/", movieController.getAllItems);
+router.get("/", movieController.getAllMovies);
 
 /**
  * @route POST /
