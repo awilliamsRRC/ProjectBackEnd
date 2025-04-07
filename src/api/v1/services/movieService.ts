@@ -34,7 +34,14 @@ export const getMoviesId = async (id: string): Promise<Movie | null> => {
     return movie || null;
   };
 
-// create Movie
+/**
+ * @description Creates a new movie and adds it to the in-memory database.
+ * @param {Object} movie - The movie object to create.
+ * @param {string} movie.name - The name of the movie.
+ * @param {string} movie.description - A description of the movie.
+ * @param {string} movie.price - The price of the movie.
+ * @returns {Promise<Movie>} A promise that resolves to the newly created movie object.
+ */
 export const createMovie = async (movie: {
     name: string;
     description: string;
@@ -47,7 +54,17 @@ export const createMovie = async (movie: {
     movies.push(newMovie);
     return newMovie;
 };
-// update movie
+
+/**
+ * @description Updates an existing movie in the in-memory database.
+ * @param {string} id - The ID of the movie to update.
+ * @param {Object} movie - The updated movie data.
+ * @param {string} movie.name - The updated name of the movie.
+ * @param {string} movie.description - The updated description of the movie.
+ * @param {string} movie.price - The updated price of the movie.
+ * @returns {Promise<Movie>} A promise that resolves to the updated movie object.
+ * @throws {Error} Throws an error if the movie with the given ID is not found.
+ */
 export const updateMovie = async (
     id: string,
     movie: { name: string; description: string; price:string }
@@ -64,7 +81,13 @@ export const updateMovie = async (
 
     return movies[index];
 }; 
-// dlete movie
+
+/**
+ * @description Deletes a movie by its unique ID from the in-memory database.
+ * @param {string} id - The ID of the movie to delete.
+ * @returns {Promise<void>} A promise that resolves once the movie is deleted.
+ * @throws {Error} Throws an error if the movie with the given ID is not found.
+ */
 export const deleteMovie = async (id: string): Promise<void> => {
     const index: number = movies.findIndex((i) => i.id === id);
     if (index === -1) {

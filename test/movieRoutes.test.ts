@@ -13,7 +13,7 @@ jest.mock("../src/api/v1/controllers/movieController", () => ({
 
 describe("Movie Routes", () => {
     afterEach(() => {
-        jest.clearAllMocks(); // Clear mocks after each test
+        jest.clearAllMocks(); 
     });
 
     // Test GET /api/v1/movies
@@ -39,7 +39,7 @@ describe("Movie Routes", () => {
                 price: "25.00"
             };
 
-            const mockId = "1"; // Ensure the ID is a string as expected by the controller
+            const mockId = "1"; 
 
             // Call the route
             await request(app).put(`/api/v1/movies/${mockId}`).send(mockMovie);
@@ -55,7 +55,7 @@ describe("Movie Routes", () => {
                 price: "25.00"
             };
 
-            const mockId = "1"; // Using string ID for consistency
+            const mockId = "1"; 
             const response = await request(app).put(`/api/v1/movies/${mockId}`).send(mockMovie);
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("Movie Updated");
@@ -91,13 +91,13 @@ describe("Movie Routes", () => {
     // Test DELETE /api/v1/movies/:id
     describe("DELETE /api/v1/movies/:id", () => {
         it("should call deleteMovie controller", async () => {
-            const mockId = "1"; // Ensure it's a string ID
+            const mockId = "1"; 
             await request(app).delete(`/api/v1/movies/${mockId}`);
             expect(movieController.deleteMovie).toHaveBeenCalled();
         });
 
         it("should return a 200 status with a success message", async () => {
-            const mockId = "1"; // Using string ID
+            const mockId = "1"; 
             const response = await request(app).delete(`/api/v1/movies/${mockId}`);
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("Movie Deleted");

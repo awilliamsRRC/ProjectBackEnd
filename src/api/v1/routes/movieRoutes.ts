@@ -14,24 +14,33 @@ const router: Router = express.Router();
 // app.use("/api/v1/movies", movieRoutes);
 
 /**
- * @route GET /movies
+ * @route GET /
  * @description Get all items.
  */
 router.get("/", movieController.getAllMovies);
+
 /**
- * @route GET /movies/:id
+ * @route GET /:id
  * @description Get items by id.
  */
 router.get("/:id", movieController.getMoviesId);
+
 /**
  * @route POST /movies
  * @description Create a new movie.
  */
 router.post("/", movieController.createMovie);
 
+/**
+ * @route PUT /:id
+ * @description Create a new movie.
+ */
 router.put("/:id", movieController.updateMovie);
 
+/**
+ * @route DELETE /:id
+ * @description Create a new movie.
+ */
 router.delete("/:id", movieController.deleteMovie);
-
 
 export default router;

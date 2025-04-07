@@ -30,9 +30,10 @@ export const getAllMovies = async (
         next(error);
     }
 };
+
 /**
  * @description Get movies by ID.
- * @route GET /movie/:id
+ * @route GET /:id
  * @returns {Promise<void>}
  */
 export const getMoviesId = async (
@@ -57,7 +58,7 @@ export const getMoviesId = async (
 };
 /**
  * @description Create a new movie.
- * @route POST /movies
+ * @route POST /
  * @returns {Promise<void>}
  */
 export const createMovie = async (
@@ -78,7 +79,7 @@ export const createMovie = async (
 };
 /**
  * @description Update an existing movie.
- * @route PUT /movies/:id
+ * @route PUT /:id
  * @returns {Promise<void>}
  */
 export const updateMovie = async (
@@ -100,6 +101,7 @@ export const updateMovie = async (
         next(error);
     }
 };
+
 /**
  * @description Delete a movie.
  * @route DELETE /movies/:id
@@ -112,7 +114,9 @@ export const deleteMovie = async (
 ): Promise<void> => {
     try {
         await movieService.deleteMovie(req.params.id);
-        res.status(HTTP_STATUS.OK).json(successResponse("Movie Deleted"));
+        res.status(200).json({
+            message: "Movie Deleted"  
+        });
     } catch (error) {
         next(error);
     }
