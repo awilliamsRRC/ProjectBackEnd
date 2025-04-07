@@ -33,13 +33,13 @@ router.post("/", movieController.createMovie);
 
 /**
  * @route PUT /:id
- * @description Create a new movie.
+ * @description Update a new movie.
  */
 router.put("/:id", movieController.updateMovie);
 
 /**
  * @route DELETE /:id
- * @description Create a new movie.
+ * @description Delete a new movie.
  */
 router.delete("/:id", movieController.deleteMovie);
 

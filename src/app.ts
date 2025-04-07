@@ -5,8 +5,10 @@ import express, { Express } from "express";
 // import setupSwagger endpoint
 import setupSwagger from "../config/swagger";
 
+
 // initialize the express application
 const app: Express = express();
+app.use(express.json());
 
 // setup swagger for api documentation
 setupSwagger(app);

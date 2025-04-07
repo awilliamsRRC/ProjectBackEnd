@@ -1,3 +1,5 @@
+import { encryptData } from "../utils/encryptionUtil";
+import { decryptData } from "../utils/encryptionUtil";
 /**
  * Movie Service (MovieService.ts)
  *
@@ -23,7 +25,11 @@ const movies: Movie[] = [];
  * @returns {Promise<Movie[]>}
  */
 export const getAllMovies = async (): Promise<Movie[]> => {
-    return movies;
+    return movies.map((movie) => ({
+        ...movie,
+        description: decryptData(movie.description || ""),
+        price: decryptData(movie.price || ""),
+    }));
 };
 /**
  * @description Get movies by ID.
@@ -47,11 +53,25 @@ export const createMovie = async (movie: {
     description: string;
     price:string
 }): Promise<Movie> => {
-    // the ... is the spread operator in js/ts and is the same as writing { name: item.name, description: item.description }
-    const newMovie: Movie = { id: Date.now().toString(), ...movie };
+    if (!movie.name || !movie.description || !movie.price) {
+        throw new Error("Movie name, description, and price are required");
+    }
+    const encryptedDescription = encryptData(movie.description);
+    const encryptedPrice = encryptData(movie.price);
+
+    console.log("Encrypted Description:", encryptedDescription);
+    console.log("Encrypted Price:", encryptedPrice);
+   
+    const newMovie: Movie = {
+        id: Date.now().toString(),
+        name: movie.name,
+        description: encryptedDescription,
+        price: encryptedPrice
+    };
 
     // adding the new item to the global scoped array of Items
     movies.push(newMovie);
+    console.log("Movies Array:", movies);
     return newMovie;
 };
 
