@@ -14,13 +14,24 @@ const router: Router = express.Router();
 // app.use("/api/v1/movies", movieRoutes);
 
 /**
- * @route GET /
+ * @route GET /movies
  * @description Get all items.
  */
-router.get("/", movieController.getAllMovies);
-
+router.get("/movies", movieController.getAllMovies);
 /**
- * @route POST /
- * @description Create a new item.
+ * @route GET /movies/:id
+ * @description Get items by id.
  */
+router.get("/movies/:id", movieController.getMoviesId);
+/**
+ * @route POST /movies
+ * @description Create a new movie.
+ */
+router.post("/movies", movieController.createMovie);
+
+router.put("/movies/:id", movieController.updateMovie);
+
+router.delete("/movies/:id", movieController.deleteMovie);
+
+
 
