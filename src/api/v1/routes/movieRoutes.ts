@@ -17,21 +17,21 @@ const router: Router = express.Router();
  * @route GET /movies
  * @description Get all items.
  */
-router.get("/movies", movieController.getAllMovies);
+router.get("/", movieController.getAllMovies);
 /**
  * @route GET /movies/:id
  * @description Get items by id.
  */
-router.get("/movies/:id", movieController.getMoviesId);
+router.get("/:id", movieController.getMoviesId);
 /**
  * @route POST /movies
  * @description Create a new movie.
  */
-router.post("/movies", movieController.createMovie);
+router.post("/", movieController.createMovie);
 
-router.put("/movies/:id", movieController.updateMovie);
+router.put("/:id", movieController.updateMovie);
 
-router.delete("/movies/:id", movieController.deleteMovie);
+router.delete("/:id", movieController.deleteMovie);
 
 
-
+export default router;

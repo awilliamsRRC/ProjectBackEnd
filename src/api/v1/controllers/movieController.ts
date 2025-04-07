@@ -67,10 +67,10 @@ export const createMovie = async (
 ): Promise<void> => {
     try {
         // call the movieService by passing the body of the request
-        const newItem: Movie = await movieService.createMovie(req.body);
+        const newMovie: Movie = await movieService.createMovie(req.body);
 
         res.status(HTTP_STATUS.CREATED).json(
-            successResponse(newItem, "Item Created")
+            successResponse(newMovie, "Movie Created")
         );
     } catch (error) {
         next(error);

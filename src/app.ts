@@ -1,3 +1,4 @@
+import movieRoutes from "./api/v1/routes/movieRoutes";
 // import the express application and type definition
 import express, { Express } from "express";
 
@@ -51,5 +52,6 @@ app.get("/api/v1/health", (req, res) => {
     // send JSON response with status, server uptime, current time, API version
 });
 
+app.use("/api/v1/movies", movieRoutes);
 // export app and server for testing
 export default app;
