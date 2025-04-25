@@ -20,6 +20,37 @@ const COLLECTION = "Movie";
  * @interface Movie
  * @description Represents an item object.
  */
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Movie:
+ *       type: object
+ *       description: Represents a movie entry in the database.
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: Unique identifier for the movie.
+ *           example: "123abc"
+ *         name:
+ *           type: string
+ *           description: Name of the movie.
+ *           example: "Inception"
+ *         description:
+ *           type: string
+ *           description: Detailed description of the movie.
+ *           example: "A mind-bending thriller about dreams within dreams."
+ *         price:
+ *           type: string
+ *           description: Price of the movie (encrypted for security).
+ *           example: "9.99 USD"
+ *       required:
+ *         - id
+ *         - name
+ *         - description
+ *         - price
+ */
 export type Movie = {
     id: string;
     name: string;

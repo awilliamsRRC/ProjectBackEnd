@@ -1,25 +1,18 @@
-import swaggerJsDoc from "swagger-jsdoc";
+import swaggerJsdoc from "swagger-jsdoc";
 
-const serverUrl =
-    process.env.SWAGGER_SERVER_URL || "http://localhost:3000/api/v1";
-
-// define swagger options
-const swaggerOptions: swaggerJsDoc.Options = {
+const swaggerOptions: swaggerJsdoc.Options = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "Task Management API Documentation",
+            title: "MovieLand",
             version: "1.0.0",
             description:
-                "This is the API documentation for the Task Management applciation.",
+                "This is the API documentation for the Movieland application.",
         },
-        server: [
+        servers: [
             {
-                url: serverUrl,
-                description:
-                    process.env.NODE_ENV === "production"
-                        ? "Production Server"
-                        : "Local Server",
+                url: "http://localhost:3000/api/v1",
+                description: "Local server",
             },
         ],
         components: {
@@ -31,12 +24,16 @@ const swaggerOptions: swaggerJsDoc.Options = {
                 },
             },
         },
+        security: [
+            {
+                bearerAuth: [],
+            },
+        ],
     },
-    // path to annotated files
-    apis: ["./src/api/v1/routes/*.ts", "./src/api/v1/models/*.ts"],
+    apis: ["./src/api/v1/routes/*.ts", "./src/api/v1/models/*.ts"], // Path to the API docs and schemas
 };
 
-// Initialize Swagger JSDoc object
-export const generateSwaggerDocs = (): object => {
-    return swaggerJsDoc(swaggerOptions);
+// Generate the Swagger spec
+export const generateSwaggerSpec = (): object => {
+    return swaggerJsdoc(swaggerOptions);
 };
