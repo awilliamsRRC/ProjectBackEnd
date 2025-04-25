@@ -1,33 +1,71 @@
-import { initializeApp, cert, ServiceAccount } from "firebase-admin/app";
+import {
+  initializeApp,
+  cert,
+  ServiceAccount,
+  AppOptions,
+  App,
+  getApps,
+} from "firebase-admin/app";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
-import serviceAccount from "../finalprojectbackend-42877-firebase-adminsdk-fbsvc-e0d0161086.json";
 import { getAuth, Auth } from "firebase-admin/auth";
-import admin from 'firebase-admin';
+import admin from "firebase-admin";
 
-initializeApp({
-    credential: cert(serviceAccount as ServiceAccount),
-});
+const getFirebaseConfig = (): AppOptions => {
+  // Extract Firebase credentials from environment variables
+  const { FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY } =
+      process.env;
 
-// Function to assign a role to a user based on email
-const assignRoleToUser = async (email: string, role: string) => {
-    try {
-      // Get the user by email
-      const userRecord = await admin.auth().getUserByEmail(email);
-  
-      // Assign custom claims (role)
-      await admin.auth().setCustomUserClaims(userRecord.uid, { role });
-  
-      console.log(`Role ${role} assigned to ${email}`);
-    } catch (error) {
-      console.error('Error assigning role:', error);
-    }
+  if (!FIREBASE_PROJECT_ID || !FIREBASE_CLIENT_EMAIL || !FIREBASE_PRIVATE_KEY) {
+      throw new Error(
+          "Missing Firebase configuration. Please check your environment variables."
+      );
+  }
+
+  console.log("Firebase Config:");
+  console.log("Project ID:", FIREBASE_PROJECT_ID);
+  console.log("Client Email:", FIREBASE_CLIENT_EMAIL);
+
+  const serviceAccount: ServiceAccount = {
+      projectId: FIREBASE_PROJECT_ID,
+      clientEmail: FIREBASE_CLIENT_EMAIL,
+      privateKey: FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
   };
 
-  assignRoleToUser('user1@example.com', 'user');  
+  return {
+      credential: cert(serviceAccount),
+  };
+};
 
-  assignRoleToUser('user4@example.com', 'admin');
+const initializeFirebaseAdmin = (): App => {
+  const existingApp: App = getApps()[0];
 
-const auth: Auth = getAuth();
-const db: Firestore = getFirestore();
+  return existingApp || initializeApp(getFirebaseConfig());
+};
 
-export  {auth, db};
+// Initialize Firebase Admin app
+const app: App = initializeFirebaseAdmin();
+const auth: Auth = getAuth(app);
+const db: Firestore = getFirestore(app);
+
+/**
+* Assigns a role to a user based on their email.
+* 
+* @param email - User's email
+* @param role - Role to assign (e.g., "admin", "user")
+*/
+const assignRoleToUser = async (email: string, role: string): Promise<void> => {
+  try {
+      const userRecord = await auth.getUserByEmail(email);
+      await auth.setCustomUserClaims(userRecord.uid, { role });
+
+      console.log(`Role '${role}' assigned to ${email}`);
+  } catch (error) {
+      console.error("Error assigning role:", error);
+  }
+};
+
+// Example role assignments
+assignRoleToUser("user1@example.com", "user");
+assignRoleToUser("user2@example.com", "admin");
+
+export { auth, db };

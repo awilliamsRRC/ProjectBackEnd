@@ -1,56 +1,14 @@
-/**
- * Movie Service (MovieService.ts)
- *
- * This file defines functions (services) for managing movie data. These functions
- * currently store movies in-memory but could be extended to use a database.
- */
-
-import { encryptData } from "../utils/encryptionUtil";
-import { decryptData } from "../utils/encryptionUtil";
+import { db } from "../../../../config/firebaseConfig";
+import { encryptData, decryptData } from "../utils/encryptionUtil";
 import {
     getDocuments,
     createDocument,
     updateDocument,
     deleteDocument,
-    getDocumentsByFieldValue,
 } from "../repositories/firestoreRepository";
 
 const COLLECTION = "Movie";
-/**
- * @interface Movie
- * @description Represents an item object.
- */
 
-/**
- * @openapi
- * components:
- *   schemas:
- *     Movie:
- *       type: object
- *       description: Represents a movie entry in the database.
- *       properties:
- *         id:
- *           type: string
- *           description: Unique identifier for the movie.
- *           example: "123abc"
- *         name:
- *           type: string
- *           description: Name of the movie.
- *           example: "Inception"
- *         description:
- *           type: string
- *           description: Detailed description of the movie.
- *           example: "A mind-bending thriller about dreams within dreams."
- *         price:
- *           type: string
- *           description: Price of the movie (encrypted for security).
- *           example: "9.99 USD"
- *       required:
- *         - id
- *         - name
- *         - description
- *         - price
- */
 export type Movie = {
     id: string;
     name: string;
@@ -58,109 +16,104 @@ export type Movie = {
     price: string;
 };
 
-const movies: Movie[] = [];
-
 /**
  * @description Get all movies.
  * @returns {Promise<Movie[]>}
  */
 export const getAllMovies = async (): Promise<Movie[]> => {
-    const snapshot: FirebaseFirestore.QuerySnapshot = await getDocuments(COLLECTION);
+    const snapshot = await getDocuments(COLLECTION);
     return snapshot.docs.map((doc) => {
-        const data: FirebaseFirestore.DocumentData = doc.data();
+        const data = doc.data();
         return {
             id: doc.id,
-            ...data,
-            description: decryptData(data.description || ""),
-            price: decryptData(data.price || ""),
+            name: data.name,
+            description: data.description ? decryptData(data.description) : "No description",
+            price: data.price ? decryptData(data.price) : "No price",
         } as Movie;
     });
 };
 
 /**
- * @description Get movies by ID.
+ * @description Get a single movie by Firestore document ID.
+ * @param {string} _ - Unused fieldName to preserve signature.
+ * @param {string} id - The Firestore document ID of the movie.
  * @returns {Promise<Movie[]>}
  */
-export const getMoviesId = async (
-    fieldName: string,
-    fieldValue: string,
-): Promise<Movie[]> => {
-    const snapshot: FirebaseFirestore.QuerySnapshot =
-        await getDocumentsByFieldValue(
-            COLLECTION,
-            fieldName,
-            fieldValue
-        );
+export const getMoviesId = async (_: string, id: string): Promise<Movie[]> => {
+    const docRef = db.collection(COLLECTION).doc(id);
+    const doc = await docRef.get();
 
-    return snapshot.docs.map((doc) => {
-        const data: FirebaseFirestore.DocumentData = doc.data();
-        return {
+    if (!doc.exists) {
+        throw new Error(`No documents found in collection ${COLLECTION} where id == ${id}`);
+    }
+
+    const data = doc.data();
+
+    return [
+        {
             id: doc.id,
-            ...data,
-            description: decryptData(data.description || ""),
-            price: decryptData(data.price || ""),
-        } as Movie;
-    });
-  };
+            name: data?.name || "Unknown Name",
+            description: data?.description ? decryptData(data.description) : "Invalid Data",
+            price: data?.price ? decryptData(data.price) : "Invalid Data",
+        },
+    ];
+};
 
 /**
- * @description Creates a new movie and adds it to the in-memory database.
- * @param {Object} movie - The movie object to create.
- * @param {string} movie.name - The name of the movie.
- * @param {string} movie.description - A description of the movie.
- * @param {string} movie.price - The price of the movie.
- * @returns {Promise<Movie>} A promise that resolves to the newly created movie object.
+ * @description Creates a new movie.
+ * @returns {Promise<Movie>}
  */
 export const createMovie = async (movie: {
     name: string;
     description: string;
-    price:string
+    price: string;
 }): Promise<Movie> => {
     if (!movie.name || !movie.description || !movie.price) {
         throw new Error("Movie name, description, and price are required");
     }
+
     const encryptedDescription = encryptData(movie.description);
     const encryptedPrice = encryptData(movie.price);
 
     const movieData = {
         name: movie.name,
         description: encryptedDescription,
-        price: encryptedPrice
+        price: encryptedPrice,
     };
 
-    const id = await createDocument(COLLECTION, movieData); 
+    const id = await createDocument(COLLECTION, movieData);
 
-    const newMovie: Movie = {
+    return {
         id,
-        ...movieData
+        ...movieData,
     };
-
-    return newMovie;
 };
 
 /**
- * @description Updates an existing movie in the in-memory database.
- * @param {string} id - The ID of the movie to update.
- * @param {Object} movie - The updated movie data.
- * @param {string} movie.name - The updated name of the movie.
- * @param {string} movie.description - The updated description of the movie.
- * @param {string} movie.price - The updated price of the movie.
- * @returns {Promise<Movie>} A promise that resolves to the updated movie object.
- * @throws {Error} Throws an error if the movie with the given ID is not found.
+ * @description Updates an existing movie, re-encrypting fields as needed.
+ * @returns {Promise<Movie>}
  */
 export const updateMovie = async (
     id: string,
     movie: Partial<Movie>
 ): Promise<Movie> => {
-    await updateDocument(COLLECTION, id, movie);
-    return { id, ...movie } as Movie;
+    const updatePayload: Partial<Movie> = {
+        ...(movie.name && { name: movie.name }),
+        ...(movie.description && { description: encryptData(movie.description) }),
+        ...(movie.price && { price: encryptData(movie.price) }),
+    };
+
+    await updateDocument(COLLECTION, id, updatePayload);
+
+    return {
+        id,
+        ...movie,
+    } as Movie;
 };
 
 /**
- * @description Deletes a movie by its unique ID from the in-memory database.
- * @param {string} id - The ID of the movie to delete.
- * @returns {Promise<void>} A promise that resolves once the movie is deleted.
- * @throws {Error} Throws an error if the movie with the given ID is not found.
+ * @description Deletes a movie by its unique ID from Firestore.
+ * @returns {Promise<void>}
  */
 export const deleteMovie = async (id: string): Promise<void> => {
     await deleteDocument(COLLECTION, id);

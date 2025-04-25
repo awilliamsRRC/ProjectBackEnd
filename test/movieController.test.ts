@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import * as movieController from "../src/api/v1/controllers/movieController";
 import * as movieService from "../src/api/v1/services/movieService";
 
-// Mocking the movieService methods with jest.mock
+// Mocking the movieService methods with jest.mock.
 jest.mock("../src/api/v1/services/movieService", () => ({
     getAllMovies: jest.fn(),
     getMoviesId: jest.fn(),

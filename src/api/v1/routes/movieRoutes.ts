@@ -2,7 +2,7 @@
  * Movie Routes (movieRoutes.ts)
  *
  * This file defines the routes for managing movies in our application.
- * It uses the Express framework for routing and makes calls to the movie controller
+ * It uses the Express framework for routing and makes calls to the movie controller.
  * (movieController.ts) to handle the logic for each route.
  */
 import express, { Router } from "express";
