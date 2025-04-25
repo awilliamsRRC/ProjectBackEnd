@@ -1,17 +1,21 @@
 import movieRoutes from "./api/v1/routes/movieRoutes";
-// import the express application and type definition
 import express, { Express } from "express";
-
-// import setupSwagger endpoint
+import morgan from "morgan";
 import setupSwagger from "../config/swagger";
+import errorHandler from "./api/v1/middleware/errorHandler";
+import { accessLogger } from "./api/v1/middleware/logger";
 
 
 // initialize the express application
 const app: Express = express();
-app.use(express.json());
 
-// setup swagger for api documentation
+
+
+// setup swagger for api documentation.
 setupSwagger(app);
+app.use(accessLogger);
+app.use(morgan("combined"));
+app.use(express.json());
 
 // respond to GET request at endpoint "/" with message
 app.get("/", (req, res) => {
@@ -55,5 +59,8 @@ app.get("/api/v1/health", (req, res) => {
 });
 
 app.use("/api/v1/movies", movieRoutes);
+
+app.use(errorHandler);
+
 // export app and server for testing
 export default app;

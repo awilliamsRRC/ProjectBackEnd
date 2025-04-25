@@ -68,7 +68,7 @@ export const validateRequest = (schema: ObjectSchema): MiddlewareFunction => {
             const data: RequestData = {
                 ...req.body, // POST/PUT request data
                 ...req.params, // URL parameters (e.g., /users/:id)
-                ...req.query, // Query string parameters (e.g., ?filter=active)
+                ...req.query, // Query string parameters (e.g., ?filter=active).
             };
 
             // Validate the combined data against the schema
@@ -77,6 +77,7 @@ export const validateRequest = (schema: ObjectSchema): MiddlewareFunction => {
             // If validation passes, proceed to the next middleware/route handler
             next();
         } catch (error) {
+            console.log("Validation failed:", (error as Error).message);
             // If validation fails, return a 400 Bad Request response
             // Type assertion is needed because catch blocks receive an unknown type
             res.status(HTTP_STATUS.BAD_REQUEST).json({

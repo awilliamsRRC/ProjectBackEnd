@@ -1,5 +1,3 @@
-import { encryptData } from "../utils/encryptionUtil";
-import { decryptData } from "../utils/encryptionUtil";
 /**
  * Movie Service (MovieService.ts)
  *
@@ -7,6 +5,17 @@ import { decryptData } from "../utils/encryptionUtil";
  * currently store movies in-memory but could be extended to use a database.
  */
 
+import { encryptData } from "../utils/encryptionUtil";
+import { decryptData } from "../utils/encryptionUtil";
+import {
+    getDocuments,
+    createDocument,
+    updateDocument,
+    deleteDocument,
+    getDocumentsByFieldValue,
+} from "../repositories/firestoreRepository";
+
+const COLLECTION = "Movie";
 /**
  * @interface Movie
  * @description Represents an item object.
@@ -25,19 +34,42 @@ const movies: Movie[] = [];
  * @returns {Promise<Movie[]>}
  */
 export const getAllMovies = async (): Promise<Movie[]> => {
-    return movies.map((movie) => ({
-        ...movie,
-        description: decryptData(movie.description || ""),
-        price: decryptData(movie.price || ""),
-    }));
+    const snapshot: FirebaseFirestore.QuerySnapshot = await getDocuments(COLLECTION);
+    return snapshot.docs.map((doc) => {
+        const data: FirebaseFirestore.DocumentData = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            description: decryptData(data.description || ""),
+            price: decryptData(data.price || ""),
+        } as Movie;
+    });
 };
+
 /**
  * @description Get movies by ID.
  * @returns {Promise<Movie[]>}
  */
-export const getMoviesId = async (id: string): Promise<Movie | null> => {
-    const movie = movies.find((movie) => movie.id === id);
-    return movie || null;
+export const getMoviesId = async (
+    fieldName: string,
+    fieldValue: string,
+): Promise<Movie[]> => {
+    const snapshot: FirebaseFirestore.QuerySnapshot =
+        await getDocumentsByFieldValue(
+            COLLECTION,
+            fieldName,
+            fieldValue
+        );
+
+    return snapshot.docs.map((doc) => {
+        const data: FirebaseFirestore.DocumentData = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            description: decryptData(data.description || ""),
+            price: decryptData(data.price || ""),
+        } as Movie;
+    });
   };
 
 /**
@@ -59,19 +91,19 @@ export const createMovie = async (movie: {
     const encryptedDescription = encryptData(movie.description);
     const encryptedPrice = encryptData(movie.price);
 
-    console.log("Encrypted Description:", encryptedDescription);
-    console.log("Encrypted Price:", encryptedPrice);
-   
-    const newMovie: Movie = {
-        id: Date.now().toString(),
+    const movieData = {
         name: movie.name,
         description: encryptedDescription,
         price: encryptedPrice
     };
 
-    // adding the new item to the global scoped array of Items
-    movies.push(newMovie);
-    console.log("Movies Array:", movies);
+    const id = await createDocument(COLLECTION, movieData); 
+
+    const newMovie: Movie = {
+        id,
+        ...movieData
+    };
+
     return newMovie;
 };
 
@@ -87,20 +119,11 @@ export const createMovie = async (movie: {
  */
 export const updateMovie = async (
     id: string,
-    movie: { name: string; description: string; price:string }
+    movie: Partial<Movie>
 ): Promise<Movie> => {
-    // retieve the item's index from the items array by comparing the item ids
-    const index: number = movies.findIndex((i) => i.id === id);
-    // if the index is not found we expects a -1
-    if (index === -1) {
-        throw new Error(`Item with ID ${id} not found`);
-    }
-
-    // assign the new value of the found index
-    movies[index] = { id, ...movie };
-
-    return movies[index];
-}; 
+    await updateDocument(COLLECTION, id, movie);
+    return { id, ...movie } as Movie;
+};
 
 /**
  * @description Deletes a movie by its unique ID from the in-memory database.
@@ -109,11 +132,5 @@ export const updateMovie = async (
  * @throws {Error} Throws an error if the movie with the given ID is not found.
  */
 export const deleteMovie = async (id: string): Promise<void> => {
-    const index: number = movies.findIndex((i) => i.id === id);
-    if (index === -1) {
-        throw new Error(`Item with ID ${id} not found`);
-    }
-
-    // remove the item from the Item array, start the delete form the index and only delete 1 index.
-    movies.splice(index, 1);
+    await deleteDocument(COLLECTION, id);
 };

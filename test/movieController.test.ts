@@ -72,7 +72,7 @@ describe("Movie Controller", () => {
             // Verifying that the response status and JSON output match the expected outcome
             expect(mockRes.status).toHaveBeenCalledWith(200); 
             expect(mockRes.json).toHaveBeenCalledWith({
-                message: 'Movie with name "1" retrieved successfully', 
+                message: 'Movie with id "1" retrieved successfully', 
                 data: mockMovie, 
                 status: "success", 
             });

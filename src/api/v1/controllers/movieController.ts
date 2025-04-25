@@ -43,13 +43,16 @@ export const getMoviesId = async (
 ): Promise<void> => {
     try {
         const { id } = req.params;
-    
-        const movie: Movie | null = await movieService.getMoviesId(id);
+        
+        const movies: Movie[] = await movieService.getMoviesId(
+            "id",
+            id,
+        );
 
         res.status(HTTP_STATUS.OK).json(
             successResponse(
-                movie,
-                `Movie with name "${id}" retrieved successfully`
+                movies,
+                `Movie with id "${id}" retrieved successfully`
             )
         );
     } catch (error) {
@@ -88,16 +91,19 @@ export const updateMovie = async (
     next: NextFunction
 ): Promise<void> => {
     try {
+        console.log("Controller called");
         // call the movieService by passing the id from the url path and the body of the request
         const updatedMovie: Movie = await movieService.updateMovie(
             req.params.id,
             req.body
         );
-
+        console.log("Request body:", req.body); 
+        console.log("Request id params",req.params.id);
         res.status(HTTP_STATUS.OK).json(
             successResponse(updatedMovie, "Movie Updated")
         );
     } catch (error) {
+        console.log("Error in controller:", error);
         next(error);
     }
 };

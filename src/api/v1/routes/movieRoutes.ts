@@ -7,6 +7,10 @@
  */
 import express, { Router } from "express";
 import * as movieController from "../controllers/movieController";
+import { movieSchema, deleteMovieSchema,movieParamSchema } from "../validation/movieValidations";
+import { validateRequest } from "../middleware/validate";
+import authenticate from "../middleware/authenticate";
+import isAuthorized from "../middleware/authorize";
 
 // express Router instance created. This instance will group all the item-related routes.
 const router: Router = express.Router();
@@ -23,7 +27,7 @@ const router: Router = express.Router();
  *       200:
  *         description: A list of movies.
  */
-router.get("/", movieController.getAllMovies);
+router.get("/",authenticate, movieController.getAllMovies);
 
 /**
  * @openapi
@@ -44,7 +48,7 @@ router.get("/", movieController.getAllMovies);
  *       404:
  *         description: Movie not found.
  */
-router.get("/:id", movieController.getMoviesId);
+router.get("/:id",authenticate, movieController.getMoviesId);
 
 /**
  * @openapi
@@ -69,7 +73,7 @@ router.get("/:id", movieController.getMoviesId);
  *       201:
  *         description: Movie created successfully.
  */
-router.post("/", movieController.createMovie);
+router.post("/",authenticate,validateRequest(movieSchema), movieController.createMovie);
 
 /**
  * @openapi
@@ -103,7 +107,7 @@ router.post("/", movieController.createMovie);
  *       404:
  *         description: Movie not found.
  */
-router.put("/:id", movieController.updateMovie);
+router.put("/:id",authenticate,isAuthorized({ hasRole: ["admin",] }),validateRequest(movieSchema), movieController.updateMovie);
 
 /**
  * @openapi
@@ -124,6 +128,6 @@ router.put("/:id", movieController.updateMovie);
  *       404:
  *         description: Movie not found.
  */
-router.delete("/:id", movieController.deleteMovie);
+router.delete("/:id",authenticate,isAuthorized({ hasRole: ["admin"] }),validateRequest(deleteMovieSchema), movieController.deleteMovie);
 
 export default router;
